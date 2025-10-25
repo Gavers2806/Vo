@@ -24,6 +24,52 @@ MainContainer.BorderSizePixel = 0
 MainContainer.ClipsDescendants = true
 MainContainer.Parent = ScreenGui
 
+-- Mini Button (Visible when GUI is hidden)
+local MiniButton = Instance.new("ImageButton")
+MiniButton.Name = "MiniButton"
+MiniButton.Size = UDim2.new(0, 50, 0, 50)
+MiniButton.Position = UDim2.new(0, 20, 0, 20)
+MiniButton.BackgroundColor3 = Color3.fromRGB(25, 30, 40)
+MiniButton.BorderSizePixel = 0
+MiniButton.AutoButtonColor = false
+MiniButton.Image = "rbxassetid://6031094677"
+MiniButton.ImageColor3 = Color3.fromRGB(0, 200, 255)
+MiniButton.Visible = false
+MiniButton.ZIndex = 10
+MiniButton.Parent = ScreenGui
+
+local MiniButtonGlow = Instance.new("Frame")
+MiniButtonGlow.Name = "MiniButtonGlow"
+MiniButtonGlow.Size = UDim2.new(1, 4, 1, 4)
+MiniButtonGlow.Position = UDim2.new(0, -2, 0, -2)
+MiniButtonGlow.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+MiniButtonGlow.BorderSizePixel = 0
+MiniButtonGlow.ZIndex = 9
+MiniButtonGlow.Parent = MiniButton
+
+local MiniButtonGradient = Instance.new("UIGradient")
+MiniButtonGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 150, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 200, 255))
+})
+MiniButtonGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.6),
+    NumberSequenceKeypoint.new(1, 0.9)
+})
+MiniButtonGradient.Parent = MiniButtonGlow
+
+local MiniLabel = Instance.new("TextLabel")
+MiniLabel.Name = "MiniLabel"
+MiniLabel.Size = UDim2.new(1, 0, 0, 12)
+MiniLabel.Position = UDim2.new(0, 0, 1, 2)
+MiniLabel.BackgroundTransparency = 1
+MiniLabel.Text = "SHOW"
+MiniLabel.TextColor3 = Color3.fromRGB(200, 230, 255)
+MiniLabel.TextSize = 8
+MiniLabel.Font = Enum.Font.GothamBold
+MiniLabel.ZIndex = 11
+MiniLabel.Parent = MiniButton
+
 -- Main Background with Gradient
 local MainBackground = Instance.new("Frame")
 MainBackground.Name = "MainBackground"
@@ -141,7 +187,7 @@ MinimizeLabel.Name = "MinimizeLabel"
 MinimizeLabel.Size = UDim2.new(1, 0, 0, 12)
 MinimizeLabel.Position = UDim2.new(0, 0, 1, 2)
 MinimizeLabel.BackgroundTransparency = 1
-MinimizeLabel.Text = "MIN"
+MinimizeLabel.Text = "HIDE"
 MinimizeLabel.TextColor3 = Color3.fromRGB(150, 150, 170)
 MinimizeLabel.TextSize = 8
 MinimizeLabel.Font = Enum.Font.Gotham
@@ -497,6 +543,21 @@ InfoLabel.TextXAlignment = Enum.TextXAlignment.Left
 InfoLabel.ZIndex = 4
 InfoLabel.Parent = StatusContainer
 
+-- Function to toggle GUI visibility
+local function ToggleGUI()
+    if MainContainer.Visible then
+        -- Hide main GUI and show mini button
+        MainContainer.Visible = false
+        MiniButton.Visible = true
+        MinimizeLabel.Text = "HIDE"
+    else
+        -- Show main GUI and hide mini button
+        MainContainer.Visible = true
+        MiniButton.Visible = false
+        MinimizeLabel.Text = "HIDE"
+    end
+end
+
 -- Make window draggable
 local Dragging = false
 local DragInput, MousePos, FramePos
@@ -538,9 +599,8 @@ CloseButton.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
-MinimizeButton.MouseButton1Click:Connect(function()
-    MainContainer.Visible = not MainContainer.Visible
-end)
+MinimizeButton.MouseButton1Click:Connect(ToggleGUI)
+MiniButton.MouseButton1Click:Connect(ToggleGUI)
 
 -- Button Hover Effects
 local function CreateButtonEffect(button)
@@ -560,6 +620,7 @@ CreateButtonEffect(NPCModeButton)
 CreateButtonEffect(PlayerModeButton)
 CreateButtonEffect(TeamCheckButton)
 CreateButtonEffect(TeleportButton)
+CreateButtonEffect(MiniButton)
 
 -- System Variables
 local AutoTeleport = false
@@ -807,5 +868,5 @@ end)
 UpdateTargetInfo()
 
 print("🎯 ELITE TELEPORTER GUI Loaded Successfully!")
-print("🎮 Professional design with smooth animations")
-print("⚡ Ready for advanced teleport operations")
+print("🎮 Press HIDE to minimize, SHOW to restore")
+print("⚡ Mini button stays visible when GUI is hidden")
