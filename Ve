@@ -1,0 +1,811 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+
+-- Create UI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "EliteTeleporterGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Main Container
+local MainContainer = Instance.new("Frame")
+MainContainer.Name = "MainContainer"
+MainContainer.Size = UDim2.new(0, 380, 0, 420)
+MainContainer.Position = UDim2.new(0.5, -190, 0.5, -210)
+MainContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+MainContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+MainContainer.BackgroundTransparency = 0.05
+MainContainer.BorderSizePixel = 0
+MainContainer.ClipsDescendants = true
+MainContainer.Parent = ScreenGui
+
+-- Main Background with Gradient
+local MainBackground = Instance.new("Frame")
+MainBackground.Name = "MainBackground"
+MainBackground.Size = UDim2.new(1, 0, 1, 0)
+MainBackground.BackgroundColor3 = Color3.fromRGB(10, 10, 18)
+MainBackground.BorderSizePixel = 0
+MainBackground.ZIndex = 0
+MainBackground.Parent = MainContainer
+
+local BackgroundGradient = Instance.new("UIGradient")
+BackgroundGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 35)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(15, 25, 40)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 35))
+})
+BackgroundGradient.Rotation = 120
+BackgroundGradient.Parent = MainBackground
+
+-- Animated Background Pattern
+local BackgroundPattern = Instance.new("ImageLabel")
+BackgroundPattern.Name = "BackgroundPattern"
+BackgroundPattern.Size = UDim2.new(1, 0, 1, 0)
+BackgroundPattern.BackgroundTransparency = 1
+BackgroundPattern.Image = "rbxassetid://8992238911"
+BackgroundPattern.ImageColor3 = Color3.fromRGB(10, 20, 30)
+BackgroundPattern.ImageTransparency = 0.9
+BackgroundPattern.ScaleType = Enum.ScaleType.Tile
+BackgroundPattern.TileSize = UDim2.new(0, 100, 0, 100)
+BackgroundPattern.ZIndex = 1
+BackgroundPattern.Parent = MainBackground
+
+-- Header Section
+local Header = Instance.new("Frame")
+Header.Name = "Header"
+Header.Size = UDim2.new(1, -20, 0, 60)
+Header.Position = UDim2.new(0, 10, 0, 10)
+Header.BackgroundTransparency = 1
+Header.ZIndex = 3
+Header.Parent = MainContainer
+
+-- Header Background with Glow
+local HeaderBackground = Instance.new("Frame")
+HeaderBackground.Name = "HeaderBackground"
+HeaderBackground.Size = UDim2.new(1, 0, 1, 0)
+HeaderBackground.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
+HeaderBackground.BorderSizePixel = 0
+HeaderBackground.ZIndex = 2
+HeaderBackground.Parent = Header
+
+local HeaderGlow = Instance.new("ImageLabel")
+HeaderGlow.Name = "HeaderGlow"
+HeaderGlow.Size = UDim2.new(1, 20, 1, 20)
+HeaderGlow.Position = UDim2.new(0, -10, 0, -10)
+HeaderGlow.BackgroundTransparency = 1
+HeaderGlow.Image = "rbxassetid://8992238911"
+HeaderGlow.ImageColor3 = Color3.fromRGB(0, 150, 255)
+HeaderGlow.ImageTransparency = 0.8
+HeaderGlow.ScaleType = Enum.ScaleType.Slice
+HeaderGlow.SliceCenter = Rect.new(100, 100, 100, 100)
+HeaderGlow.ZIndex = 1
+HeaderGlow.Parent = HeaderBackground
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Size = UDim2.new(0.7, 0, 1, 0)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "ELITE TELEPORTER"
+Title.TextColor3 = Color3.fromRGB(220, 220, 255)
+Title.TextSize = 18
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.ZIndex = 4
+Title.Parent = Header
+
+local SubTitle = Instance.new("TextLabel")
+SubTitle.Name = "SubTitle"
+SubTitle.Size = UDim2.new(0.7, 0, 0, 20)
+SubTitle.Position = UDim2.new(0, 15, 0, 30)
+SubTitle.BackgroundTransparency = 1
+SubTitle.Text = "Advanced Auto-Teleport System"
+SubTitle.TextColor3 = Color3.fromRGB(150, 200, 255)
+SubTitle.TextSize = 11
+SubTitle.Font = Enum.Font.Gotham
+SubTitle.TextXAlignment = Enum.TextXAlignment.Left
+SubTitle.ZIndex = 4
+SubTitle.Parent = Header
+
+-- Control Buttons Container
+local ControlButtons = Instance.new("Frame")
+ControlButtons.Name = "ControlButtons"
+ControlButtons.Size = UDim2.new(0.3, 0, 1, 0)
+ControlButtons.Position = UDim2.new(0.7, 0, 0, 0)
+ControlButtons.BackgroundTransparency = 1
+ControlButtons.ZIndex = 4
+ControlButtons.Parent = Header
+
+-- Minimize Button
+local MinimizeButton = Instance.new("ImageButton")
+MinimizeButton.Name = "MinimizeButton"
+MinimizeButton.Size = UDim2.new(0, 25, 0, 25)
+MinimizeButton.Position = UDim2.new(0, 5, 0.5, -12)
+MinimizeButton.AnchorPoint = Vector2.new(0, 0.5)
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
+MinimizeButton.BorderSizePixel = 0
+MinimizeButton.AutoButtonColor = false
+MinimizeButton.Image = "rbxassetid://6031094677"
+MinimizeButton.ImageColor3 = Color3.fromRGB(200, 200, 220)
+MinimizeButton.ZIndex = 5
+MinimizeButton.Parent = ControlButtons
+
+local MinimizeLabel = Instance.new("TextLabel")
+MinimizeLabel.Name = "MinimizeLabel"
+MinimizeLabel.Size = UDim2.new(1, 0, 0, 12)
+MinimizeLabel.Position = UDim2.new(0, 0, 1, 2)
+MinimizeLabel.BackgroundTransparency = 1
+MinimizeLabel.Text = "MIN"
+MinimizeLabel.TextColor3 = Color3.fromRGB(150, 150, 170)
+MinimizeLabel.TextSize = 8
+MinimizeLabel.Font = Enum.Font.Gotham
+MinimizeLabel.ZIndex = 5
+MinimizeLabel.Parent = MinimizeButton
+
+-- Close Button
+local CloseButton = Instance.new("ImageButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Size = UDim2.new(0, 25, 0, 25)
+CloseButton.Position = UDim2.new(1, -30, 0.5, -12)
+CloseButton.AnchorPoint = Vector2.new(1, 0.5)
+CloseButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+CloseButton.BorderSizePixel = 0
+CloseButton.AutoButtonColor = false
+CloseButton.Image = "rbxassetid://6031094678"
+CloseButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.ZIndex = 5
+CloseButton.Parent = ControlButtons
+
+local CloseLabel = Instance.new("TextLabel")
+CloseLabel.Name = "CloseLabel"
+CloseLabel.Size = UDim2.new(1, 0, 0, 12)
+CloseLabel.Position = UDim2.new(0, 0, 1, 2)
+CloseLabel.BackgroundTransparency = 1
+CloseLabel.Text = "CLOSE"
+CloseLabel.TextColor3 = Color3.fromRGB(150, 150, 170)
+CloseLabel.TextSize = 8
+CloseLabel.Font = Enum.Font.Gotham
+CloseLabel.ZIndex = 5
+CloseLabel.Parent = CloseButton
+
+-- Main Content Area
+local ContentArea = Instance.new("Frame")
+ContentArea.Name = "ContentArea"
+ContentArea.Size = UDim2.new(1, -20, 1, -90)
+ContentArea.Position = UDim2.new(0, 10, 0, 80)
+ContentArea.BackgroundTransparency = 1
+ContentArea.ZIndex = 3
+ContentArea.Parent = MainContainer
+
+-- Mode Selection Card
+local ModeCard = Instance.new("Frame")
+ModeCard.Name = "ModeCard"
+ModeCard.Size = UDim2.new(1, 0, 0, 80)
+ModeCard.BackgroundColor3 = Color3.fromRGB(25, 30, 40)
+ModeCard.BorderSizePixel = 0
+ModeCard.ZIndex = 3
+ModeCard.Parent = ContentArea
+
+local ModeCardGlow = Instance.new("Frame")
+ModeCardGlow.Name = "ModeCardGlow"
+ModeCardGlow.Size = UDim2.new(1, 4, 1, 4)
+ModeCardGlow.Position = UDim2.new(0, -2, 0, -2)
+ModeCardGlow.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+ModeCardGlow.BorderSizePixel = 0
+ModeCardGlow.ZIndex = 2
+ModeCardGlow.Parent = ModeCard
+
+local ModeCardGradient = Instance.new("UIGradient")
+ModeCardGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 100, 200)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 255))
+})
+ModeCardGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.6),
+    NumberSequenceKeypoint.new(1, 0.9)
+})
+ModeCardGradient.Parent = ModeCardGlow
+
+local ModeTitle = Instance.new("TextLabel")
+ModeTitle.Name = "ModeTitle"
+ModeTitle.Size = UDim2.new(1, -20, 0, 25)
+ModeTitle.Position = UDim2.new(0, 10, 0, 5)
+ModeTitle.BackgroundTransparency = 1
+ModeTitle.Text = "SELECT TARGET MODE"
+ModeTitle.TextColor3 = Color3.fromRGB(220, 220, 255)
+ModeTitle.TextSize = 14
+ModeTitle.Font = Enum.Font.GothamBold
+ModeTitle.TextXAlignment = Enum.TextXAlignment.Left
+ModeTitle.ZIndex = 4
+ModeTitle.Parent = ModeCard
+
+-- Mode Buttons Container
+local ModeButtons = Instance.new("Frame")
+ModeButtons.Name = "ModeButtons"
+ModeButtons.Size = UDim2.new(1, -20, 0, 40)
+ModeButtons.Position = UDim2.new(0, 10, 0, 30)
+ModeButtons.BackgroundTransparency = 1
+ModeButtons.ZIndex = 4
+ModeButtons.Parent = ModeCard
+
+-- NPC Mode Button
+local NPCModeButton = Instance.new("TextButton")
+NPCModeButton.Name = "NPCModeButton"
+NPCModeButton.Size = UDim2.new(0.48, 0, 1, 0)
+NPCModeButton.BackgroundColor3 = Color3.fromRGB(0, 120, 60)
+NPCModeButton.BorderSizePixel = 0
+NPCModeButton.AutoButtonColor = false
+NPCModeButton.Text = "🧟 NPC"
+NPCModeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+NPCModeButton.TextSize = 12
+NPCModeButton.Font = Enum.Font.GothamBold
+NPCModeButton.ZIndex = 5
+NPCModeButton.Parent = ModeButtons
+
+-- Player Mode Button
+local PlayerModeButton = Instance.new("TextButton")
+PlayerModeButton.Name = "PlayerModeButton"
+PlayerModeButton.Size = UDim2.new(0.48, 0, 1, 0)
+PlayerModeButton.Position = UDim2.new(0.52, 0, 0, 0)
+PlayerModeButton.BackgroundColor3 = Color3.fromRGB(50, 55, 70)
+PlayerModeButton.BorderSizePixel = 0
+PlayerModeButton.AutoButtonColor = false
+PlayerModeButton.Text = "👤 PLAYER"
+PlayerModeButton.TextColor3 = Color3.fromRGB(180, 180, 200)
+PlayerModeButton.TextSize = 12
+PlayerModeButton.Font = Enum.Font.GothamBold
+PlayerModeButton.ZIndex = 5
+PlayerModeButton.Parent = ModeButtons
+
+-- Settings Card
+local SettingsCard = Instance.new("Frame")
+SettingsCard.Name = "SettingsCard"
+SettingsCard.Size = UDim2.new(1, 0, 0, 100)
+SettingsCard.Position = UDim2.new(0, 0, 0, 90)
+SettingsCard.BackgroundColor3 = Color3.fromRGB(25, 30, 40)
+SettingsCard.BorderSizePixel = 0
+SettingsCard.ZIndex = 3
+SettingsCard.Parent = ContentArea
+
+local SettingsCardGlow = Instance.new("Frame")
+SettingsCardGlow.Name = "SettingsCardGlow"
+SettingsCardGlow.Size = UDim2.new(1, 4, 1, 4)
+SettingsCardGlow.Position = UDim2.new(0, -2, 0, -2)
+SettingsCardGlow.BackgroundColor3 = Color3.fromRGB(100, 100, 200)
+SettingsCardGlow.BorderSizePixel = 0
+SettingsCardGlow.ZIndex = 2
+SettingsCardGlow.Parent = SettingsCard
+
+local SettingsCardGradient = Instance.new("UIGradient")
+SettingsCardGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 100, 200)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 150, 255))
+})
+SettingsCardGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.6),
+    NumberSequenceKeypoint.new(1, 0.9)
+})
+SettingsCardGradient.Parent = SettingsCardGlow
+
+local SettingsTitle = Instance.new("TextLabel")
+SettingsTitle.Name = "SettingsTitle"
+SettingsTitle.Size = UDim2.new(1, -20, 0, 25)
+SettingsTitle.Position = UDim2.new(0, 10, 0, 5)
+SettingsTitle.BackgroundTransparency = 1
+SettingsTitle.Text = "TELEPORT SETTINGS"
+SettingsTitle.TextColor3 = Color3.fromRGB(220, 220, 255)
+SettingsTitle.TextSize = 14
+SettingsTitle.Font = Enum.Font.GothamBold
+SettingsTitle.TextXAlignment = Enum.TextXAlignment.Left
+SettingsTitle.ZIndex = 4
+SettingsTitle.Parent = SettingsCard
+
+-- Team Check Toggle
+local TeamCheckContainer = Instance.new("Frame")
+TeamCheckContainer.Name = "TeamCheckContainer"
+TeamCheckContainer.Size = UDim2.new(1, -20, 0, 25)
+TeamCheckContainer.Position = UDim2.new(0, 10, 0, 30)
+TeamCheckContainer.BackgroundTransparency = 1
+TeamCheckContainer.ZIndex = 4
+TeamCheckContainer.Parent = SettingsCard
+
+local TeamCheckLabel = Instance.new("TextLabel")
+TeamCheckLabel.Name = "TeamCheckLabel"
+TeamCheckLabel.Size = UDim2.new(0.7, 0, 1, 0)
+TeamCheckLabel.BackgroundTransparency = 1
+TeamCheckLabel.Text = "Team Check"
+TeamCheckLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
+TeamCheckLabel.TextSize = 12
+TeamCheckLabel.Font = Enum.Font.Gotham
+TeamCheckLabel.TextXAlignment = Enum.TextXAlignment.Left
+TeamCheckLabel.ZIndex = 4
+TeamCheckLabel.Parent = TeamCheckContainer
+
+local TeamCheckButton = Instance.new("TextButton")
+TeamCheckButton.Name = "TeamCheckButton"
+TeamCheckButton.Size = UDim2.new(0.25, 0, 0, 20)
+TeamCheckButton.Position = UDim2.new(0.75, 0, 0.5, -10)
+TeamCheckButton.AnchorPoint = Vector2.new(0, 0.5)
+TeamCheckButton.BackgroundColor3 = Color3.fromRGB(0, 150, 80)
+TeamCheckButton.BorderSizePixel = 0
+TeamCheckButton.AutoButtonColor = false
+TeamCheckButton.Text = "ON"
+TeamCheckButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeamCheckButton.TextSize = 11
+TeamCheckButton.Font = Enum.Font.GothamBold
+TeamCheckButton.ZIndex = 5
+TeamCheckButton.Parent = TeamCheckContainer
+
+-- Range Slider
+local RangeContainer = Instance.new("Frame")
+RangeContainer.Name = "RangeContainer"
+RangeContainer.Size = UDim2.new(1, -20, 0, 40)
+RangeContainer.Position = UDim2.new(0, 10, 0, 55)
+RangeContainer.BackgroundTransparency = 1
+RangeContainer.ZIndex = 4
+RangeContainer.Parent = SettingsCard
+
+local RangeLabel = Instance.new("TextLabel")
+RangeLabel.Name = "RangeLabel"
+RangeLabel.Size = UDim2.new(1, 0, 0, 15)
+RangeLabel.BackgroundTransparency = 1
+RangeLabel.Text = "TELEPORT RANGE"
+RangeLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
+RangeLabel.TextSize = 11
+RangeLabel.Font = Enum.Font.Gotham
+RangeLabel.TextXAlignment = Enum.TextXAlignment.Left
+RangeLabel.ZIndex = 4
+RangeLabel.Parent = RangeContainer
+
+local RangeValue = Instance.new("TextLabel")
+RangeValue.Name = "RangeValue"
+RangeValue.Size = UDim2.new(0.3, 0, 0, 15)
+RangeValue.Position = UDim2.new(0.7, 0, 0, 0)
+RangeValue.BackgroundTransparency = 1
+RangeValue.Text = "100"
+RangeValue.TextColor3 = Color3.fromRGB(0, 200, 255)
+RangeValue.TextSize = 11
+RangeValue.Font = Enum.Font.GothamBold
+RangeValue.TextXAlignment = Enum.TextXAlignment.Right
+RangeValue.ZIndex = 4
+RangeValue.Parent = RangeContainer
+
+local RangeSlider = Instance.new("Frame")
+RangeSlider.Name = "RangeSlider"
+RangeSlider.Size = UDim2.new(1, 0, 0, 12)
+RangeSlider.Position = UDim2.new(0, 0, 0, 20)
+RangeSlider.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
+RangeSlider.BorderSizePixel = 0
+RangeSlider.ZIndex = 4
+RangeSlider.Parent = RangeContainer
+
+local RangeFill = Instance.new("Frame")
+RangeFill.Name = "RangeFill"
+RangeFill.Size = UDim2.new(0.2, 0, 1, 0)
+RangeFill.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+RangeFill.BorderSizePixel = 0
+RangeFill.ZIndex = 5
+RangeFill.Parent = RangeSlider
+
+local RangeHandle = Instance.new("TextButton")
+RangeHandle.Name = "RangeHandle"
+RangeHandle.Size = UDim2.new(0, 16, 0, 16)
+RangeHandle.Position = UDim2.new(0.2, -8, 0.5, -8)
+RangeHandle.AnchorPoint = Vector2.new(0.5, 0.5)
+RangeHandle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+RangeHandle.BorderSizePixel = 0
+RangeHandle.AutoButtonColor = false
+RangeHandle.Text = ""
+RangeHandle.ZIndex = 6
+RangeHandle.Parent = RangeSlider
+
+-- Main Control Card
+local ControlCard = Instance.new("Frame")
+ControlCard.Name = "ControlCard"
+ControlCard.Size = UDim2.new(1, 0, 0, 120)
+ControlCard.Position = UDim2.new(0, 0, 0, 200)
+ControlCard.BackgroundColor3 = Color3.fromRGB(25, 30, 40)
+ControlCard.BorderSizePixel = 0
+ControlCard.ZIndex = 3
+ControlCard.Parent = ContentArea
+
+local ControlCardGlow = Instance.new("Frame")
+ControlCardGlow.Name = "ControlCardGlow"
+ControlCardGlow.Size = UDim2.new(1, 4, 1, 4)
+ControlCardGlow.Position = UDim2.new(0, -2, 0, -2)
+ControlCardGlow.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+ControlCardGlow.BorderSizePixel = 0
+ControlCardGlow.ZIndex = 2
+ControlCardGlow.Parent = ControlCard
+
+local ControlCardGradient = Instance.new("UIGradient")
+ControlCardGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 200, 100)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 150))
+})
+ControlCardGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.6),
+    NumberSequenceKeypoint.new(1, 0.9)
+})
+ControlCardGradient.Parent = ControlCardGlow
+
+-- Main Teleport Button
+local TeleportButton = Instance.new("TextButton")
+TeleportButton.Name = "TeleportButton"
+TeleportButton.Size = UDim2.new(1, -20, 0, 50)
+TeleportButton.Position = UDim2.new(0, 10, 0, 15)
+TeleportButton.BackgroundColor3 = Color3.fromRGB(0, 120, 60)
+TeleportButton.BorderSizePixel = 0
+TeleportButton.AutoButtonColor = false
+TeleportButton.Text = "🚀 START AUTO TELEPORT"
+TeleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportButton.TextSize = 14
+TeleportButton.Font = Enum.Font.GothamBold
+TeleportButton.ZIndex = 5
+TeleportButton.Parent = ControlCard
+
+-- Status Display
+local StatusContainer = Instance.new("Frame")
+StatusContainer.Name = "StatusContainer"
+StatusContainer.Size = UDim2.new(1, -20, 0, 40)
+StatusContainer.Position = UDim2.new(0, 10, 0, 75)
+StatusContainer.BackgroundTransparency = 1
+StatusContainer.ZIndex = 4
+StatusContainer.Parent = ControlCard
+
+local StatusIcon = Instance.new("TextLabel")
+StatusIcon.Name = "StatusIcon"
+StatusIcon.Size = UDim2.new(0, 20, 0, 20)
+StatusIcon.Position = UDim2.new(0, 0, 0, 0)
+StatusIcon.BackgroundTransparency = 1
+StatusIcon.Text = "⏸️"
+StatusIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+StatusIcon.TextSize = 12
+StatusIcon.Font = Enum.Font.Gotham
+StatusIcon.ZIndex = 4
+StatusIcon.Parent = StatusContainer
+
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Name = "StatusLabel"
+StatusLabel.Size = UDim2.new(1, -25, 0, 20)
+StatusLabel.Position = UDim2.new(0, 25, 0, 0)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = "SYSTEM READY"
+StatusLabel.TextColor3 = Color3.fromRGB(220, 220, 255)
+StatusLabel.TextSize = 12
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+StatusLabel.ZIndex = 4
+StatusLabel.Parent = StatusContainer
+
+local InfoLabel = Instance.new("TextLabel")
+InfoLabel.Name = "InfoLabel"
+InfoLabel.Size = UDim2.new(1, 0, 0, 15)
+InfoLabel.Position = UDim2.new(0, 0, 0, 22)
+InfoLabel.BackgroundTransparency = 1
+InfoLabel.Text = "Select mode and press start"
+InfoLabel.TextColor3 = Color3.fromRGB(150, 180, 220)
+InfoLabel.TextSize = 10
+InfoLabel.Font = Enum.Font.Gotham
+InfoLabel.TextXAlignment = Enum.TextXAlignment.Left
+InfoLabel.ZIndex = 4
+InfoLabel.Parent = StatusContainer
+
+-- Make window draggable
+local Dragging = false
+local DragInput, MousePos, FramePos
+
+Header.InputBegan:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+        Dragging = true
+        MousePos = Input.Position
+        FramePos = MainContainer.Position
+        
+        Input.Changed:Connect(function()
+            if Input.UserInputState == Enum.UserInputState.End then
+                Dragging = false
+            end
+        end)
+    end
+end)
+
+Header.InputChanged:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseMovement then
+        DragInput = Input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(Input)
+    if Input == DragInput and Dragging then
+        local Delta = Input.Position - MousePos
+        MainContainer.Position = UDim2.new(
+            FramePos.X.Scale, 
+            FramePos.X.Offset + Delta.X,
+            FramePos.Y.Scale, 
+            FramePos.Y.Offset + Delta.Y
+        )
+    end
+end)
+
+-- Control Buttons
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+MinimizeButton.MouseButton1Click:Connect(function()
+    MainContainer.Visible = not MainContainer.Visible
+end)
+
+-- Button Hover Effects
+local function CreateButtonEffect(button)
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = button.BackgroundColor3 + Color3.fromRGB(20, 20, 20)}):Play()
+    end)
+    
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = button.BackgroundColor3 - Color3.fromRGB(20, 20, 20)}):Play()
+    end)
+end
+
+-- Apply effects to all buttons
+CreateButtonEffect(MinimizeButton)
+CreateButtonEffect(CloseButton)
+CreateButtonEffect(NPCModeButton)
+CreateButtonEffect(PlayerModeButton)
+CreateButtonEffect(TeamCheckButton)
+CreateButtonEffect(TeleportButton)
+
+-- System Variables
+local AutoTeleport = false
+local TeleportConnection = nil
+local CurrentRange = 100
+local TeamCheck = true
+local CurrentMode = "NPC"
+
+-- Range Slider Control
+local RangeDragging = false
+
+RangeHandle.MouseButton1Down:Connect(function()
+    RangeDragging = true
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+        RangeDragging = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(Input)
+    if RangeDragging and Input.UserInputType == Enum.UserInputType.MouseMovement then
+        local X = (Input.Position.X - RangeSlider.AbsolutePosition.X) / RangeSlider.AbsoluteSize.X
+        X = math.clamp(X, 0, 1)
+        
+        CurrentRange = math.floor(10 + (X * 490))
+        RangeFill.Size = UDim2.new(X, 0, 1, 0)
+        RangeHandle.Position = UDim2.new(X, -8, 0.5, -8)
+        RangeValue.Text = tostring(CurrentRange)
+        
+        UpdateTargetInfo()
+    end
+end)
+
+-- Team Check Toggle
+TeamCheckButton.MouseButton1Click:Connect(function()
+    TeamCheck = not TeamCheck
+    TeamCheckButton.BackgroundColor3 = TeamCheck and Color3.fromRGB(0, 150, 80) or Color3.fromRGB(80, 80, 100)
+    TeamCheckButton.Text = TeamCheck and "ON" or "OFF"
+    UpdateTargetInfo()
+end)
+
+-- Mode Selection
+NPCModeButton.MouseButton1Click:Connect(function()
+    CurrentMode = "NPC"
+    NPCModeButton.BackgroundColor3 = Color3.fromRGB(0, 120, 60)
+    PlayerModeButton.BackgroundColor3 = Color3.fromRGB(50, 55, 70)
+    NPCModeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PlayerModeButton.TextColor3 = Color3.fromRGB(180, 180, 200)
+    UpdateTargetInfo()
+end)
+
+PlayerModeButton.MouseButton1Click:Connect(function()
+    CurrentMode = "Player"
+    PlayerModeButton.BackgroundColor3 = Color3.fromRGB(0, 120, 60)
+    NPCModeButton.BackgroundColor3 = Color3.fromRGB(50, 55, 70)
+    PlayerModeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NPCModeButton.TextColor3 = Color3.fromRGB(180, 180, 200)
+    UpdateTargetInfo()
+end)
+
+-- Check if same team
+function IsSameTeam(player)
+    if not TeamCheck then return false end
+    if not LocalPlayer.Team or not player.Team then return false end
+    return LocalPlayer.Team == player.Team
+end
+
+-- Find closest target
+function FindClosestTarget()
+    local closestTarget = nil
+    local shortestDistance = math.huge
+    
+    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        return nil, 0
+    end
+    
+    local playerPos = LocalPlayer.Character.HumanoidRootPart.Position
+    
+    if CurrentMode == "NPC" then
+        for _, object in pairs(workspace:GetDescendants()) do
+            if object:IsA("Model") then
+                local humanoid = object:FindFirstChildOfClass("Humanoid")
+                local rootPart = object:FindFirstChild("HumanoidRootPart") or object:FindFirstChild("Torso") or object:FindFirstChild("UpperTorso")
+                
+                if humanoid and humanoid.Health > 0 and rootPart and not Players:GetPlayerFromCharacter(object) then
+                    local distance = (playerPos - rootPart.Position).Magnitude
+                    if distance < shortestDistance and distance <= CurrentRange then
+                        shortestDistance = distance
+                        closestTarget = object
+                    end
+                end
+            end
+        end
+    else
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and not IsSameTeam(player) then
+                local character = player.Character
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                local rootPart = character:FindFirstChild("HumanoidRootPart")
+                
+                if humanoid and humanoid.Health > 0 and rootPart then
+                    local distance = (playerPos - rootPart.Position).Magnitude
+                    if distance < shortestDistance and distance <= CurrentRange then
+                        shortestDistance = distance
+                        closestTarget = player
+                    end
+                end
+            end
+        end
+    end
+    
+    return closestTarget, shortestDistance
+end
+
+-- Update target information
+function UpdateTargetInfo()
+    local target, distance = FindClosestTarget()
+    if target then
+        if distance <= CurrentRange then
+            StatusIcon.Text = "✅"
+            StatusIcon.TextColor3 = Color3.fromRGB(0, 255, 100)
+            StatusLabel.Text = "TARGET FOUND"
+            InfoLabel.Text = string.format("Distance: %.1f | Range: %d", distance, CurrentRange)
+        else
+            StatusIcon.Text = "⚠️"
+            StatusIcon.TextColor3 = Color3.fromRGB(255, 200, 0)
+            StatusLabel.Text = "OUT OF RANGE"
+            InfoLabel.Text = string.format("Distance: %.1f | Range: %d", distance, CurrentRange)
+        end
+    else
+        StatusIcon.Text = "❌"
+        StatusIcon.TextColor3 = Color3.fromRGB(255, 80, 80)
+        StatusLabel.Text = "NO TARGET FOUND"
+        InfoLabel.Text = string.format("Searching... | Range: %d", CurrentRange)
+    end
+end
+
+-- Teleport function
+function TeleportToTarget()
+    if not LocalPlayer.Character then return false end
+    
+    local character = LocalPlayer.Character
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    
+    if not humanoid or not rootPart or humanoid.Health <= 0 then
+        return false
+    end
+    
+    local target, distance = FindClosestTarget()
+    
+    if target and distance <= CurrentRange then
+        local targetRoot
+        if CurrentMode == "NPC" then
+            targetRoot = target:FindFirstChild("HumanoidRootPart") or target:FindFirstChild("Torso") or target:FindFirstChild("UpperTorso")
+        else
+            targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+        end
+        
+        if targetRoot then
+            local offset = CFrame.new(0, 0, 4)
+            local targetPosition = targetRoot.CFrame * offset
+            
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+            
+            rootPart.CFrame = targetPosition
+            
+            wait(0.1)
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+            
+            return true, distance
+        end
+    end
+    
+    return false, 0
+end
+
+-- Toggle Auto Teleport
+function ToggleAutoTeleport()
+    AutoTeleport = not AutoTeleport
+    
+    if AutoTeleport then
+        TeleportButton.Text = "⏹️ STOP TELEPORT"
+        TeleportButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+        StatusIcon.Text = "▶️"
+        StatusIcon.TextColor3 = Color3.fromRGB(0, 255, 100)
+        StatusLabel.Text = "TELEPORTING..."
+        
+        TeleportConnection = RunService.Heartbeat:Connect(function()
+            if AutoTeleport then
+                local success, distance = TeleportToTarget()
+                if success then
+                    InfoLabel.Text = string.format("Teleported! | Distance: %.1f", distance)
+                else
+                    InfoLabel.Text = string.format("Searching... | Range: %d", CurrentRange)
+                end
+            end
+        end)
+        
+    else
+        TeleportButton.Text = "🚀 START AUTO TELEPORT"
+        TeleportButton.BackgroundColor3 = Color3.fromRGB(0, 120, 60)
+        StatusIcon.Text = "⏸️"
+        StatusIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+        StatusLabel.Text = "SYSTEM READY"
+        
+        UpdateTargetInfo()
+        
+        if TeleportConnection then
+            TeleportConnection:Disconnect()
+            TeleportConnection = nil
+        end
+    end
+end
+
+-- Main button event
+TeleportButton.MouseButton1Click:Connect(ToggleAutoTeleport)
+
+-- Continuous info updates
+local InfoUpdateConnection = RunService.Heartbeat:Connect(function()
+    if not AutoTeleport then
+        UpdateTargetInfo()
+    end
+end)
+
+-- Background animation
+spawn(function()
+    while ScreenGui.Parent do
+        BackgroundGradient.Rotation = BackgroundGradient.Rotation + 0.3
+        wait(0.1)
+    end
+end)
+
+-- Initial update
+UpdateTargetInfo()
+
+print("🎯 ELITE TELEPORTER GUI Loaded Successfully!")
+print("🎮 Professional design with smooth animations")
+print("⚡ Ready for advanced teleport operations")
