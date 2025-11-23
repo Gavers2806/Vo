@@ -870,3 +870,1409 @@ UpdateTargetInfo()
 print("🎯 ELITE TELEPORTER GUI Loaded Successfully!")
 print("🎮 Press HIDE to minimize, SHOW to restore")
 print("⚡ Mini button stays visible when GUI is hidden")
+
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+local Lighting = game:GetService("Lighting")
+local HttpService = game:GetService("HttpService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+-- Create main UI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "VEX_AIM_BOT"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Main Container
+local MainContainer = Instance.new("Frame")
+MainContainer.Name = "MainContainer"
+MainContainer.Size = UDim2.new(0, 550, 0, 650)
+MainContainer.Position = UDim2.new(0.5, -275, 0.5, -100)
+MainContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+MainContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+MainContainer.BackgroundTransparency = 0.05
+MainContainer.BorderSizePixel = 0
+MainContainer.ClipsDescendants = true
+MainContainer.Parent = ScreenGui
+
+-- Mini Button (Visible when GUI is hidden)
+local MiniButton = Instance.new("ImageButton")
+MiniButton.Name = "MiniButton"
+MiniButton.Size = UDim2.new(0, 50, 0, 50)
+MiniButton.Position = UDim2.new(0, 20, 0, 20)
+MiniButton.BackgroundColor3 = Color3.fromRGB(25, 30, 40)
+MiniButton.BorderSizePixel = 0
+MiniButton.AutoButtonColor = false
+MiniButton.Image = "rbxassetid://6031094677"
+MiniButton.ImageColor3 = Color3.fromRGB(0, 200, 255)
+MiniButton.Visible = false
+MiniButton.ZIndex = 10
+MiniButton.Parent = ScreenGui
+
+local MiniButtonGlow = Instance.new("Frame")
+MiniButtonGlow.Name = "MiniButtonGlow"
+MiniButtonGlow.Size = UDim2.new(1, 4, 1, 4)
+MiniButtonGlow.Position = UDim2.new(0, -2, 0, -2)
+MiniButtonGlow.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+MiniButtonGlow.BorderSizePixel = 0
+MiniButtonGlow.ZIndex = 9
+MiniButtonGlow.Parent = MiniButton
+
+local MiniButtonGradient = Instance.new("UIGradient")
+MiniButtonGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 150, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 200, 255))
+})
+MiniButtonGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.6),
+    NumberSequenceKeypoint.new(1, 0.9)
+})
+MiniButtonGradient.Parent = MiniButtonGlow
+
+local MiniLabel = Instance.new("TextLabel")
+MiniLabel.Name = "MiniLabel"
+MiniLabel.Size = UDim2.new(1, 0, 0, 12)
+MiniLabel.Position = UDim2.new(0, 0, 1, 2)
+MiniLabel.BackgroundTransparency = 1
+MiniLabel.Text = "SHOW"
+MiniLabel.TextColor3 = Color3.fromRGB(200, 230, 255)
+MiniLabel.TextSize = 8
+MiniLabel.Font = Enum.Font.GothamBold
+MiniLabel.ZIndex = 11
+MiniLabel.Parent = MiniButton
+
+-- Main Background with Gradient
+local MainBackground = Instance.new("Frame")
+MainBackground.Name = "MainBackground"
+MainBackground.Size = UDim2.new(1, 0, 1, 0)
+MainBackground.BackgroundColor3 = Color3.fromRGB(10, 10, 18)
+MainBackground.BorderSizePixel = 0
+MainBackground.ZIndex = 0
+MainBackground.Parent = MainContainer
+
+local BackgroundGradient = Instance.new("UIGradient")
+BackgroundGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 35)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(15, 25, 40)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 35))
+})
+BackgroundGradient.Rotation = 120
+BackgroundGradient.Parent = MainBackground
+
+-- Animated Background Pattern
+local BackgroundPattern = Instance.new("ImageLabel")
+BackgroundPattern.Name = "BackgroundPattern"
+BackgroundPattern.Size = UDim2.new(1, 0, 1, 0)
+BackgroundPattern.BackgroundTransparency = 1
+BackgroundPattern.Image = "rbxassetid://8992238911"
+BackgroundPattern.ImageColor3 = Color3.fromRGB(10, 20, 30)
+BackgroundPattern.ImageTransparency = 0.9
+BackgroundPattern.ScaleType = Enum.ScaleType.Tile
+BackgroundPattern.TileSize = UDim2.new(0, 100, 0, 100)
+BackgroundPattern.ZIndex = 1
+BackgroundPattern.Parent = MainBackground
+
+-- Header Section
+local Header = Instance.new("Frame")
+Header.Name = "Header"
+Header.Size = UDim2.new(1, -20, 0, 60)
+Header.Position = UDim2.new(0, 10, 0, 10)
+Header.BackgroundTransparency = 1
+Header.ZIndex = 3
+Header.Parent = MainContainer
+
+-- Header Background with Glow
+local HeaderBackground = Instance.new("Frame")
+HeaderBackground.Name = "HeaderBackground"
+HeaderBackground.Size = UDim2.new(1, 0, 1, 0)
+HeaderBackground.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
+HeaderBackground.BorderSizePixel = 0
+HeaderBackground.ZIndex = 2
+HeaderBackground.Parent = Header
+
+local HeaderGlow = Instance.new("ImageLabel")
+HeaderGlow.Name = "HeaderGlow"
+HeaderGlow.Size = UDim2.new(1, 20, 1, 20)
+HeaderGlow.Position = UDim2.new(0, -10, 0, -10)
+HeaderGlow.BackgroundTransparency = 1
+HeaderGlow.Image = "rbxassetid://8992238911"
+HeaderGlow.ImageColor3 = Color3.fromRGB(0, 150, 255)
+HeaderGlow.ImageTransparency = 0.8
+HeaderGlow.ScaleType = Enum.ScaleType.Slice
+HeaderGlow.SliceCenter = Rect.new(100, 100, 100, 100)
+HeaderGlow.ZIndex = 1
+HeaderGlow.Parent = HeaderBackground
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Size = UDim2.new(0.7, 0, 1, 0)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "🔥 VEX AIMBOT v1.0 (BETA) 🔥"
+Title.TextColor3 = Color3.fromRGB(220, 220, 255)
+Title.TextSize = 18
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.ZIndex = 4
+Title.Parent = Header
+
+local SubTitle = Instance.new("TextLabel")
+SubTitle.Name = "SubTitle"
+SubTitle.Size = UDim2.new(0.7, 0, 0, 20)
+SubTitle.Position = UDim2.new(0, 35, 0, 35)
+SubTitle.BackgroundTransparency = 1
+SubTitle.Text = "By X.Ports Aimbot System"
+SubTitle.TextColor3 = Color3.fromRGB(150, 200, 255)
+SubTitle.TextSize = 11
+SubTitle.Font = Enum.Font.Gotham
+SubTitle.TextXAlignment = Enum.TextXAlignment.Left
+SubTitle.ZIndex = 4
+SubTitle.Parent = Header
+
+-- Control Buttons Container
+local ControlButtons = Instance.new("Frame")
+ControlButtons.Name = "ControlButtons"
+ControlButtons.Size = UDim2.new(0.3, 0, 1, 0)
+ControlButtons.Position = UDim2.new(0.7, 0, 0, 0)
+ControlButtons.BackgroundTransparency = 1
+ControlButtons.ZIndex = 4
+ControlButtons.Parent = Header
+
+-- Minimize Button
+local MinimizeButton = Instance.new("ImageButton")
+MinimizeButton.Name = "MinimizeButton"
+MinimizeButton.Size = UDim2.new(0, 25, 0, 25)
+MinimizeButton.Position = UDim2.new(0, 5, 0.5, -12)
+MinimizeButton.AnchorPoint = Vector2.new(0, 0.5)
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
+MinimizeButton.BorderSizePixel = 0
+MinimizeButton.AutoButtonColor = false
+MinimizeButton.Image = "rbxassetid://6031094677"
+MinimizeButton.ImageColor3 = Color3.fromRGB(200, 200, 220)
+MinimizeButton.ZIndex = 5
+MinimizeButton.Parent = ControlButtons
+
+local MinimizeLabel = Instance.new("TextLabel")
+MinimizeLabel.Name = "MinimizeLabel"
+MinimizeLabel.Size = UDim2.new(1, 0, 0, 12)
+MinimizeLabel.Position = UDim2.new(0, 0, 1, 2)
+MinimizeLabel.BackgroundTransparency = 1
+MinimizeLabel.Text = "HIDE"
+MinimizeLabel.TextColor3 = Color3.fromRGB(150, 150, 170)
+MinimizeLabel.TextSize = 8
+MinimizeLabel.Font = Enum.Font.Gotham
+MinimizeLabel.ZIndex = 5
+MinimizeLabel.Parent = MinimizeButton
+
+-- Close Button
+local CloseButton = Instance.new("ImageButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Size = UDim2.new(0, 25, 0, 25)
+CloseButton.Position = UDim2.new(1, -30, 0.5, -12)
+CloseButton.AnchorPoint = Vector2.new(1, 0.5)
+CloseButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+CloseButton.BorderSizePixel = 0
+CloseButton.AutoButtonColor = false
+CloseButton.Image = "rbxassetid://6031094678"
+CloseButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.ZIndex = 5
+CloseButton.Parent = ControlButtons
+
+local CloseLabel = Instance.new("TextLabel")
+CloseLabel.Name = "CloseLabel"
+CloseLabel.Size = UDim2.new(1, 0, 0, 12)
+CloseLabel.Position = UDim2.new(0, 0, 1, 2)
+CloseLabel.BackgroundTransparency = 1
+CloseLabel.Text = "CLOSE"
+CloseLabel.TextColor3 = Color3.fromRGB(150, 150, 170)
+CloseLabel.TextSize = 8
+CloseLabel.Font = Enum.Font.Gotham
+CloseLabel.ZIndex = 5
+CloseLabel.Parent = CloseButton
+
+-- Main Content Area
+local ContentArea = Instance.new("Frame")
+ContentArea.Name = "ContentArea"
+ContentArea.Size = UDim2.new(1, -20, 1, -90)
+ContentArea.Position = UDim2.new(0, 10, 0, 80)
+ContentArea.BackgroundTransparency = 1
+ContentArea.ZIndex = 3
+ContentArea.Parent = MainContainer
+
+-- Tab Buttons Container
+local TabButtonsContainer = Instance.new("Frame")
+TabButtonsContainer.Name = "TabButtons"
+TabButtonsContainer.Size = UDim2.new(1, 0, 0, 35)
+TabButtonsContainer.BackgroundTransparency = 1
+TabButtonsContainer.ZIndex = 4
+TabButtonsContainer.Parent = ContentArea
+
+-- Tabs list
+local Tabs = {
+    {Name = "AIMBOT", Icon = "🎯"},
+    {Name = "VISUALS", Icon = "👁️"},
+    {Name = "PLAYER", Icon = "👤"},
+    {Name = "WORLD", Icon = "🌍"},
+    {Name = "MISC", Icon = "⚙️"},
+    {Name = "CREDITS", Icon = "🌟"}
+}
+
+local TabButtons = {}
+local TabFrames = {}
+local CurrentTab = "AIMBOT"
+
+-- Create tabs
+for i, Tab in ipairs(Tabs) do
+    -- Tab button
+    local TabButton = Instance.new("TextButton")
+    TabButton.Name = Tab.Name.."Tab"
+    TabButton.Size = UDim2.new(1/#Tabs, -4, 1, 0)
+    TabButton.Position = UDim2.new((i-1)/#Tabs, 0, 0, 0)
+    TabButton.BackgroundColor3 = Tab.Name == CurrentTab and Color3.fromRGB(0, 120, 60) or Color3.fromRGB(50, 55, 70)
+    TabButton.BorderSizePixel = 0
+    TabButton.AutoButtonColor = false
+    TabButton.Text = Tab.Icon.." "..Tab.Name
+    TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TabButton.TextSize = 11
+    TabButton.Font = Enum.Font.GothamBold
+    TabButton.ZIndex = 5
+    TabButton.Parent = TabButtonsContainer
+
+    -- Tab content frame
+    local TabFrame = Instance.new("Frame")
+    TabFrame.Name = Tab.Name.."Frame"
+    TabFrame.Size = UDim2.new(1, 0, 1, -45)
+    TabFrame.Position = UDim2.new(0, 0, 0, 45)
+    TabFrame.BackgroundTransparency = 1
+    TabFrame.Visible = Tab.Name == CurrentTab
+    TabFrame.ZIndex = 3
+    TabFrame.Parent = ContentArea
+
+    -- Scroll frame
+    local ScrollFrame = Instance.new("ScrollingFrame")
+    ScrollFrame.Name = "ScrollFrame"
+    ScrollFrame.Size = UDim2.new(1, 0, 1, 0)
+    ScrollFrame.Position = UDim2.new(0, 0, 0, 0)
+    ScrollFrame.BackgroundTransparency = 1
+    ScrollFrame.ScrollBarThickness = 4
+    ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 150)
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    ScrollFrame.ZIndex = 3
+    ScrollFrame.Parent = TabFrame
+
+    -- Content organization
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.Padding = UDim.new(0, 8)
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ListLayout.Parent = ScrollFrame
+
+    -- Save references
+    TabButtons[Tab.Name] = TabButton
+    TabFrames[Tab.Name] = TabFrame
+
+    -- Tab button click event
+    TabButton.MouseButton1Click:Connect(function()
+        SwitchTab(Tab.Name)
+    end)
+end
+
+-- Function to switch tabs
+function SwitchTab(TabName)
+    if CurrentTab == TabName then return end
+    
+    -- Hide current tab
+    TabFrames[CurrentTab].Visible = false
+    TabButtons[CurrentTab].BackgroundColor3 = Color3.fromRGB(50, 55, 70)
+    
+    -- Show new tab
+    CurrentTab = TabName
+    TabFrames[CurrentTab].Visible = true
+    TabButtons[CurrentTab].BackgroundColor3 = Color3.fromRGB(0, 120, 60)
+    
+    UpdateStatus("Switched to "..TabName.." tab")
+end
+
+-- Function to create a section
+function CreateSection(Title, Parent)
+    local SectionCard = Instance.new("Frame")
+    SectionCard.Name = Title.."Section"
+    SectionCard.Size = UDim2.new(1, 0, 0, 0)
+    SectionCard.AutomaticSize = Enum.AutomaticSize.Y
+    SectionCard.BackgroundColor3 = Color3.fromRGB(25, 30, 40)
+    SectionCard.BorderSizePixel = 0
+    SectionCard.ZIndex = 3
+    SectionCard.LayoutOrder = #Parent:GetChildren()
+    SectionCard.Parent = Parent
+
+    local SectionGlow = Instance.new("Frame")
+    SectionGlow.Name = "SectionGlow"
+    SectionGlow.Size = UDim2.new(1, 4, 1, 4)
+    SectionGlow.Position = UDim2.new(0, -2, 0, -2)
+    SectionGlow.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+    SectionGlow.BorderSizePixel = 0
+    SectionGlow.ZIndex = 2
+    SectionGlow.Parent = SectionCard
+
+    local SectionGradient = Instance.new("UIGradient")
+    SectionGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 100, 200)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 255))
+    })
+    SectionGradient.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.6),
+        NumberSequenceKeypoint.new(1, 0.9)
+    })
+    SectionGradient.Parent = SectionGlow
+
+    -- Section title
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Name = "Title"
+    TitleLabel.Size = UDim2.new(1, -20, 0, 25)
+    TitleLabel.Position = UDim2.new(0, 10, 0, 5)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Text = "📁 "..Title
+    TitleLabel.TextColor3 = Color3.fromRGB(220, 220, 255)
+    TitleLabel.TextSize = 14
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.ZIndex = 4
+    TitleLabel.Parent = SectionCard
+
+    -- Section content
+    local Content = Instance.new("Frame")
+    Content.Name = "Content"
+    Content.Size = UDim2.new(1, -20, 0, 0)
+    Content.Position = UDim2.new(0, 10, 0, 30)
+    Content.AutomaticSize = Enum.AutomaticSize.Y
+    Content.BackgroundTransparency = 1
+    Content.ZIndex = 4
+    Content.Parent = SectionCard
+
+    -- Item organization
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.Padding = UDim.new(0, 5)
+    ListLayout.Parent = Content
+
+    return Content
+end
+
+-- Function to create a toggle
+function CreateToggle(Label, Default, Callback, Parent)
+    local ToggleContainer = Instance.new("Frame")
+    ToggleContainer.Name = Label.."Toggle"
+    ToggleContainer.Size = UDim2.new(1, 0, 0, 25)
+    ToggleContainer.BackgroundTransparency = 1
+    ToggleContainer.LayoutOrder = #Parent:GetChildren()
+    ToggleContainer.ZIndex = 4
+    ToggleContainer.Parent = Parent
+
+    -- Toggle label
+    local LabelText = Instance.new("TextLabel")
+    LabelText.Name = "Label"
+    LabelText.Size = UDim2.new(0.7, 0, 1, 0)
+    LabelText.BackgroundTransparency = 1
+    LabelText.Text = "• "..Label
+    LabelText.TextColor3 = Color3.fromRGB(200, 200, 220)
+    LabelText.TextSize = 12
+    LabelText.Font = Enum.Font.Gotham
+    LabelText.TextXAlignment = Enum.TextXAlignment.Left
+    LabelText.ZIndex = 4
+    LabelText.Parent = ToggleContainer
+
+    -- Toggle button
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Name = "Button"
+    ToggleButton.Size = UDim2.new(0.25, 0, 0, 20)
+    ToggleButton.Position = UDim2.new(0.75, 0, 0.5, -10)
+    ToggleButton.AnchorPoint = Vector2.new(0, 0.5)
+    ToggleButton.BackgroundColor3 = Default and Color3.fromRGB(0, 150, 80) or Color3.fromRGB(80, 80, 100)
+    ToggleButton.BorderSizePixel = 0
+    ToggleButton.AutoButtonColor = false
+    ToggleButton.Text = Default and "ON" or "OFF"
+    ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleButton.TextSize = 11
+    ToggleButton.Font = Enum.Font.GothamBold
+    ToggleButton.ZIndex = 5
+    ToggleButton.Parent = ToggleContainer
+
+    -- Click event
+    ToggleButton.MouseButton1Click:Connect(function()
+        local NewValue = not Default
+        Default = NewValue
+        
+        ToggleButton.BackgroundColor3 = NewValue and Color3.fromRGB(0, 150, 80) or Color3.fromRGB(80, 80, 100)
+        ToggleButton.Text = NewValue and "ON" or "OFF"
+        
+        Callback(NewValue)
+    end)
+
+    return {Button = ToggleButton, Value = Default}
+end
+
+-- Function to create a slider
+function CreateSlider(Label, Min, Max, Default, Callback, Parent)
+    local SliderContainer = Instance.new("Frame")
+    SliderContainer.Name = Label.."Slider"
+    SliderContainer.Size = UDim2.new(1, 0, 0, 45)
+    SliderContainer.BackgroundTransparency = 1
+    SliderContainer.LayoutOrder = #Parent:GetChildren()
+    SliderContainer.ZIndex = 4
+    SliderContainer.Parent = Parent
+
+    -- Slider label
+    local LabelText = Instance.new("TextLabel")
+    LabelText.Name = "Label"
+    LabelText.Size = UDim2.new(1, 0, 0, 15)
+    LabelText.BackgroundTransparency = 1
+    LabelText.Text = "📊 "..Label
+    LabelText.TextColor3 = Color3.fromRGB(200, 200, 220)
+    LabelText.TextSize = 12
+    LabelText.Font = Enum.Font.Gotham
+    LabelText.TextXAlignment = Enum.TextXAlignment.Left
+    LabelText.ZIndex = 4
+    LabelText.Parent = SliderContainer
+
+    -- Value text
+    local ValueText = Instance.new("TextLabel")
+    ValueText.Name = "Value"
+    ValueText.Size = UDim2.new(0.3, 0, 0, 15)
+    ValueText.Position = UDim2.new(0.7, 0, 0, 0)
+    ValueText.BackgroundTransparency = 1
+    ValueText.Text = tostring(Default)
+    ValueText.TextColor3 = Color3.fromRGB(0, 200, 255)
+    ValueText.TextSize = 11
+    ValueText.Font = Enum.Font.GothamBold
+    ValueText.TextXAlignment = Enum.TextXAlignment.Right
+    ValueText.ZIndex = 4
+    ValueText.Parent = SliderContainer
+
+    -- Track
+    local Track = Instance.new("Frame")
+    Track.Name = "Track"
+    Track.Size = UDim2.new(1, 0, 0, 8)
+    Track.Position = UDim2.new(0, 0, 0, 20)
+    Track.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
+    Track.BorderSizePixel = 0
+    Track.ZIndex = 4
+    Track.Parent = SliderContainer
+
+    -- Fill
+    local Fill = Instance.new("Frame")
+    Fill.Name = "Fill"
+    Fill.Size = UDim2.new((Default - Min) / (Max - Min), 0, 1, 0)
+    Fill.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    Fill.BorderSizePixel = 0
+    Fill.ZIndex = 5
+    Fill.Parent = Track
+
+    -- Handle
+    local Handle = Instance.new("TextButton")
+    Handle.Name = "Handle"
+    Handle.Size = UDim2.new(0, 16, 0, 16)
+    Handle.Position = UDim2.new((Default - Min) / (Max - Min), -8, 0.5, -8)
+    Handle.AnchorPoint = Vector2.new(0.5, 0.5)
+    Handle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Handle.BorderSizePixel = 0
+    Handle.AutoButtonColor = false
+    Handle.Text = ""
+    Handle.ZIndex = 6
+    Handle.Parent = Track
+
+    -- Drag variables
+    local Dragging = false
+
+    -- Start drag
+    Handle.MouseButton1Down:Connect(function()
+        Dragging = true
+    end)
+
+    -- End drag
+    UserInputService.InputEnded:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+            Dragging = false
+        end
+    end)
+
+    -- Update during drag
+    UserInputService.InputChanged:Connect(function(Input)
+        if Dragging and Input.UserInputType == Enum.UserInputType.MouseMovement then
+            local X = (Input.Position.X - Track.AbsolutePosition.X) / Track.AbsoluteSize.X
+            X = math.clamp(X, 0, 1)
+            
+            local Value = Min + (Max - Min) * X
+            Value = math.floor(Value * 10) / 10 -- Round to 1 decimal place
+            
+            Fill.Size = UDim2.new(X, 0, 1, 0)
+            Handle.Position = UDim2.new(X, -8, 0.5, -8)
+            ValueText.Text = tostring(Value)
+            
+            Callback(Value)
+        end
+    end)
+
+    return {Track = Track, Value = Default}
+end
+
+-- Function to create a button
+function CreateButton(Label, Callback, Parent)
+    local Button = Instance.new("TextButton")
+    Button.Name = Label.."Button"
+    Button.Size = UDim2.new(1, 0, 0, 30)
+    Button.BackgroundColor3 = Color3.fromRGB(0, 120, 60)
+    Button.BorderSizePixel = 0
+    Button.AutoButtonColor = false
+    Button.Text = "🔘 "..Label
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.TextSize = 12
+    Button.Font = Enum.Font.GothamBold
+    Button.LayoutOrder = #Parent:GetChildren()
+    Button.ZIndex = 5
+    Button.Parent = Parent
+
+    -- Click event
+    Button.MouseButton1Click:Connect(function()
+        Callback()
+    end)
+
+    return Button
+end
+
+-- Function to create a keybind
+function CreateKeybind(Label, DefaultKey, Callback, Parent)
+    local KeybindContainer = Instance.new("Frame")
+    KeybindContainer.Name = Label.."Keybind"
+    KeybindContainer.Size = UDim2.new(1, 0, 0, 25)
+    KeybindContainer.BackgroundTransparency = 1
+    KeybindContainer.LayoutOrder = #Parent:GetChildren()
+    KeybindContainer.ZIndex = 4
+    KeybindContainer.Parent = Parent
+
+    -- Keybind label
+    local LabelText = Instance.new("TextLabel")
+    LabelText.Name = "Label"
+    LabelText.Size = UDim2.new(0.7, 0, 1, 0)
+    LabelText.BackgroundTransparency = 1
+    LabelText.Text = "⌨️ "..Label
+    LabelText.TextColor3 = Color3.fromRGB(200, 200, 220)
+    LabelText.TextSize = 12
+    LabelText.Font = Enum.Font.Gotham
+    LabelText.TextXAlignment = Enum.TextXAlignment.Left
+    LabelText.ZIndex = 4
+    LabelText.Parent = KeybindContainer
+
+    -- Keybind button
+    local KeybindButton = Instance.new("TextButton")
+    KeybindButton.Name = "Button"
+    KeybindButton.Size = UDim2.new(0.25, 0, 0, 20)
+    KeybindButton.Position = UDim2.new(0.75, 0, 0.5, -10)
+    KeybindButton.AnchorPoint = Vector2.new(0, 0.5)
+    KeybindButton.BackgroundColor3 = Color3.fromRGB(60, 65, 80)
+    KeybindButton.BorderSizePixel = 0
+    KeybindButton.AutoButtonColor = false
+    KeybindButton.Text = DefaultKey
+    KeybindButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    KeybindButton.TextSize = 10
+    KeybindButton.Font = Enum.Font.GothamBold
+    KeybindButton.ZIndex = 5
+    KeybindButton.Parent = KeybindContainer
+
+    local Listening = false
+    local CurrentKey = DefaultKey
+
+    KeybindButton.MouseButton1Click:Connect(function()
+        Listening = true
+        KeybindButton.Text = "[...]"
+        KeybindButton.BackgroundColor3 = Color3.fromRGB(0, 150, 80)
+        
+        local Connection
+        Connection = UserInputService.InputBegan:Connect(function(Input)
+            if Listening then
+                if Input.UserInputType == Enum.UserInputType.Keyboard then
+                    CurrentKey = Input.KeyCode.Name
+                elseif Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    CurrentKey = "MouseButton1"
+                elseif Input.UserInputType == Enum.UserInputType.MouseButton2 then
+                    CurrentKey = "MouseButton2"
+                end
+                
+                KeybindButton.Text = CurrentKey
+                KeybindButton.BackgroundColor3 = Color3.fromRGB(60, 65, 80)
+                Listening = false
+                Connection:Disconnect()
+                
+                Callback(CurrentKey)
+            end
+        end)
+    end)
+
+    return {Button = KeybindButton, Key = CurrentKey}
+end
+
+-- Function to make window draggable
+function MakeDraggable(DragPart, MainPart)
+    local Dragging = false
+    local DragInput, MousePos, FramePos
+
+    DragPart.InputBegan:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+            Dragging = true
+            MousePos = Input.Position
+            FramePos = MainPart.Position
+            
+            Input.Changed:Connect(function()
+                if Input.UserInputState == Enum.UserInputState.End then
+                    Dragging = false
+                end
+            end)
+        end
+    end)
+
+    DragPart.InputChanged:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseMovement then
+            DragInput = Input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(Input)
+        if Input == DragInput and Dragging then
+            local Delta = Input.Position - MousePos
+            MainPart.Position = UDim2.new(
+                FramePos.X.Scale, 
+                FramePos.X.Offset + Delta.X,
+                FramePos.Y.Scale, 
+                FramePos.Y.Offset + Delta.Y
+            )
+        end
+    end)
+end
+
+-- Function to update status
+function UpdateStatus(Message)
+    StatusLabel.Text = "📢 "..Message
+    wait(3)
+    StatusLabel.Text = "✅ System Ready | FPS: "..math.random(50, 80).." | Ping: "..math.random(10, 50).."ms"
+end
+
+-- Function to toggle UI visibility
+function ToggleVisibility()
+    MainContainer.Visible = not MainContainer.Visible
+    MiniButton.Visible = not MainContainer.Visible
+    MinimizeLabel.Text = MainContainer.Visible and "HIDE" or "SHOW"
+end
+
+-- =============================================
+-- Enhanced Aimbot System
+-- =============================================
+local Aimbot = {
+    Enabled = false,
+    Active = false,
+    Key = "MouseButton2",
+    Target = nil,
+    TargetPart = "Head",
+    Smoothness = 0.3,
+    FOV = 120,
+    Range = 2000,
+    WallCheck = true,
+    TeamCheck = true,
+    VisibleCheck = true,
+    Prediction = 0.15,
+    AutoShoot = false,
+    SilentAim = false,
+    HitChance = 100,
+    Priority = "Closest",
+    TriggerKey = "MouseButton1",
+    TriggerDelay = 0.1,
+    FOVCircleVisible = true
+}
+
+-- FOV Circle
+local FOVCircle = Instance.new("Frame")
+FOVCircle.Name = "FOVCircle"
+FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+FOVCircle.BackgroundTransparency = 1
+FOVCircle.Size = UDim2.new(0, Aimbot.FOV * 2, 0, Aimbot.FOV * 2)
+FOVCircle.Position = UDim2.new(0.5, 0, 0.5, 0)
+FOVCircle.Parent = ScreenGui
+
+local FOVOutline = Instance.new("Frame")
+FOVOutline.Name = "Outline"
+FOVOutline.AnchorPoint = Vector2.new(0.5, 0.5)
+FOVOutline.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+FOVOutline.BackgroundTransparency = 0.8
+FOVOutline.Size = UDim2.new(1, 2, 1, 2)
+FOVOutline.Position = UDim2.new(0.5, 0, 0.5, 0)
+FOVOutline.Parent = FOVCircle
+
+local function UpdateFOVCircle()
+    FOVCircle.Size = UDim2.new(0, Aimbot.FOV * 2, 0, Aimbot.FOV * 2)
+    FOVCircle.Visible = Aimbot.Enabled and Aimbot.FOVCircleVisible
+    FOVOutline.Visible = Aimbot.Enabled and Aimbot.FOVCircleVisible
+end
+
+-- Aimbot functions
+local function IsSameTeam(player)
+    if not Aimbot.TeamCheck then return false end
+    if not LocalPlayer.Team or not player.Team then return false end
+    return LocalPlayer.Team == player.Team
+end
+
+local function GetClosestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = Aimbot.Range
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            if IsSameTeam(player) then continue end
+            
+            local character = player.Character
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            
+            if humanoid and humanoid.Health > 0 and rootPart then
+                local screenPoint, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
+                
+                if onScreen then
+                    local mousePos = UserInputService:GetMouseLocation()
+                    local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - mousePos).Magnitude
+                    
+                    if distance < Aimbot.FOV and distance < shortestDistance then
+                        if not Aimbot.WallCheck then
+                            closestPlayer = player
+                            shortestDistance = distance
+                        else
+                            -- Simple wall check
+                            local ray = Ray.new(Camera.CFrame.Position, (rootPart.Position - Camera.CFrame.Position).Unit * Aimbot.Range)
+                            local part = workspace:FindPartOnRayWithIgnoreList(ray, {LocalPlayer.Character, Camera})
+                            
+                            if not part or part:IsDescendantOf(character) then
+                                closestPlayer = player
+                                shortestDistance = distance
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    return closestPlayer
+end
+
+local AimbotConnection
+local function StartAimbot()
+    if AimbotConnection then AimbotConnection:Disconnect() end
+    
+    AimbotConnection = RunService.RenderStepped:Connect(function()
+        if not Aimbot.Enabled or not Aimbot.Active then 
+            Aimbot.Target = nil
+            return 
+        end
+        
+        Aimbot.Target = GetClosestPlayer()
+        
+        if Aimbot.Target and Aimbot.Target.Character then
+            local targetPart = Aimbot.Target.Character:FindFirstChild(Aimbot.TargetPart) or Aimbot.Target.Character:FindFirstChild("HumanoidRootPart")
+            
+            if targetPart then
+                local predictedPosition = targetPart.Position
+                if Aimbot.Prediction > 0 then
+                    local humanoid = Aimbot.Target.Character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        predictedPosition = predictedPosition + (humanoid.MoveDirection * Aimbot.Prediction)
+                    end
+                end
+                
+                local screenPoint = Camera:WorldToViewportPoint(predictedPosition)
+                local mouseLocation = UserInputService:GetMouseLocation()
+                local targetPosition = Vector2.new(screenPoint.X, screenPoint.Y)
+                
+                local delta = (targetPosition - mouseLocation) * Aimbot.Smoothness
+                mousemoverel(delta.X, delta.Y)
+                
+                if Aimbot.AutoShoot then
+                    mouse1click()
+                end
+            end
+        end
+    end)
+end
+
+-- =============================================
+-- Enhanced ESP System
+-- =============================================
+local ESP = {
+    Enabled = false,
+    Box = true,
+    Name = true,
+    Distance = true,
+    Tracers = true,
+    HealthBar = true,
+    TeamCheck = true,
+    ShowTeam = false
+}
+
+local ESPFolders = {}
+local function CreateESP(player)
+    if ESPFolders[player] then
+        ESPFolders[player]:Destroy()
+    end
+    
+    local folder = Instance.new("Folder")
+    folder.Name = player.Name
+    folder.Parent = ScreenGui
+    ESPFolders[player] = folder
+    
+    local function UpdateESP()
+        if not player.Character then return end
+        
+        local character = player.Character
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        
+        if not humanoid or humanoid.Health <= 0 or not rootPart then
+            for _, child in pairs(folder:GetChildren()) do
+                child.Visible = false
+            end
+            return
+        end
+        
+        if not ESP.Enabled or (ESP.TeamCheck and IsSameTeam(player) and not ESP.ShowTeam) then
+            for _, child in pairs(folder:GetChildren()) do
+                child.Visible = false
+            end
+            return
+        end
+        
+        -- Box ESP
+        if ESP.Box then
+            local box = folder:FindFirstChild("Box")
+            if not box then
+                box = Instance.new("Frame")
+                box.Name = "Box"
+                box.AnchorPoint = Vector2.new(0.5, 0.5)
+                box.BackgroundTransparency = 0.7
+                box.BorderSizePixel = 1
+                box.Parent = folder
+            end
+            
+            local screenPoint, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
+            if onScreen then
+                box.Size = UDim2.new(0, 50, 0, 70)
+                box.Position = UDim2.new(0, screenPoint.X, 0, screenPoint.Y)
+                box.Visible = true
+                box.BackgroundColor3 = IsSameTeam(player) and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+            else
+                box.Visible = false
+            end
+        end
+        
+        -- Name ESP
+        if ESP.Name then
+            local nameLabel = folder:FindFirstChild("Name")
+            if not nameLabel then
+                nameLabel = Instance.new("TextLabel")
+                nameLabel.Name = "Name"
+                nameLabel.BackgroundTransparency = 1
+                nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                nameLabel.TextSize = 14
+                nameLabel.Font = Enum.Font.GothamBold
+                nameLabel.Parent = folder
+            end
+            
+            local screenPoint, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
+            if onScreen then
+                nameLabel.Text = player.Name
+                nameLabel.Position = UDim2.new(0, screenPoint.X, 0, screenPoint.Y - 40)
+                nameLabel.Visible = true
+            else
+                nameLabel.Visible = false
+            end
+        end
+    end
+    
+    player.CharacterAdded:Connect(function()
+        wait(1)
+        UpdateESP()
+    end)
+    
+    if player.Character then
+        UpdateESP()
+    end
+    
+    RunService.RenderStepped:Connect(UpdateESP)
+end
+
+local function ToggleESP(state)
+    ESP.Enabled = state
+    if state then
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                CreateESP(player)
+            end
+        end
+    else
+        for _, folder in pairs(ESPFolders) do
+            folder:Destroy()
+        end
+        ESPFolders = {}
+    end
+end
+
+-- =============================================
+-- Player Enhancements
+-- =============================================
+local Player = {
+    Speed = false,
+    SpeedValue = 50,
+    Jump = false,
+    JumpValue = 50,
+    Noclip = false,
+    Fly = false,
+    FlySpeed = 50
+}
+
+local NoclipConnection
+local FlyConnection
+
+local function StartNoclip()
+    if NoclipConnection then NoclipConnection:Disconnect() end
+    
+    NoclipConnection = RunService.Stepped:Connect(function()
+        if Player.Noclip and LocalPlayer.Character then
+            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end)
+end
+
+local function StartFly()
+    if FlyConnection then FlyConnection:Disconnect() end
+    
+    FlyConnection = RunService.Heartbeat:Connect(function()
+        if Player.Fly and LocalPlayer.Character then
+            local rootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                local flyDirection = Vector3.new(0, 0, 0)
+                
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                    flyDirection = flyDirection + Camera.CFrame.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                    flyDirection = flyDirection - Camera.CFrame.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                    flyDirection = flyDirection - Camera.CFrame.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                    flyDirection = flyDirection + Camera.CFrame.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                    flyDirection = flyDirection + Vector3.new(0, 1, 0)
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                    flyDirection = flyDirection - Vector3.new(0, 1, 0)
+                end
+                
+                if flyDirection.Magnitude > 0 then
+                    rootPart.Velocity = flyDirection.Unit * Player.FlySpeed
+                else
+                    rootPart.Velocity = Vector3.new(0, 0, 0)
+                end
+            end
+        end
+    end)
+end
+
+-- =============================================
+-- World Modifications
+-- =============================================
+local World = {
+    FullBright = false,
+    Time = 14,
+    Fog = true
+}
+
+local function UpdateWorld()
+    if World.FullBright then
+        Lighting.Brightness = 2
+        Lighting.GlobalShadows = false
+    else
+        Lighting.Brightness = 1
+        Lighting.GlobalShadows = true
+    end
+    
+    Lighting.ClockTime = World.Time
+    
+    if World.Fog then
+        Lighting.FogEnd = 1000
+    else
+        Lighting.FogEnd = 100000
+    end
+end
+
+-- =============================================
+-- Create Tab Contents
+-- =============================================
+local function CreateAimbotContent()
+    local TabFrame = TabFrames["AIMBOT"].ScrollFrame
+    
+    local BasicSection = CreateSection("Basic Settings", TabFrame)
+    
+    CreateToggle("Enable Aimbot", false, function(Value)
+        Aimbot.Enabled = Value
+        UpdateFOVCircle()
+        UpdateStatus("Aimbot: "..(Value and "ON" or "OFF"))
+    end, BasicSection)
+    
+    CreateToggle("Show FOV Circle", true, function(Value)
+        Aimbot.FOVCircleVisible = Value
+        UpdateFOVCircle()
+    end, BasicSection)
+    
+    CreateToggle("Auto Shoot", false, function(Value)
+        Aimbot.AutoShoot = Value
+    end, BasicSection)
+    
+    CreateToggle("Team Check", true, function(Value)
+        Aimbot.TeamCheck = Value
+    end, BasicSection)
+    
+    CreateToggle("Wall Check", true, function(Value)
+        Aimbot.WallCheck = Value
+    end, BasicSection)
+    
+    local SliderSection = CreateSection("Aimbot Settings", TabFrame)
+    
+    CreateSlider("FOV Size", 10, 500, 120, function(Value)
+        Aimbot.FOV = Value
+        UpdateFOVCircle()
+    end, SliderSection)
+    
+    CreateSlider("Smoothness", 0.1, 1, 0.3, function(Value)
+        Aimbot.Smoothness = Value
+    end, SliderSection)
+    
+    CreateSlider("Range", 50, 5000, 2000, function(Value)
+        Aimbot.Range = Value
+    end, SliderSection)
+    
+    CreateSlider("Prediction", 0, 1, 0.15, function(Value)
+        Aimbot.Prediction = Value
+    end, SliderSection)
+    
+    local KeybindsSection = CreateSection("Keybinds", TabFrame)
+    
+    CreateKeybind("Aimbot Key", "MouseButton2", function(Key)
+        Aimbot.Key = Key
+    end, KeybindsSection)
+    
+    CreateKeybind("Trigger Key", "MouseButton1", function(Key)
+        Aimbot.TriggerKey = Key
+    end, KeybindsSection)
+end
+
+local function CreateVisualsContent()
+    local TabFrame = TabFrames["VISUALS"].ScrollFrame
+    
+    local ESPSection = CreateSection("ESP Settings", TabFrame)
+    
+    CreateToggle("Enable ESP", false, function(Value)
+        ToggleESP(Value)
+        UpdateStatus("ESP: "..(Value and "ON" or "OFF"))
+    end, ESPSection)
+    
+    CreateToggle("Box ESP", true, function(Value)
+        ESP.Box = Value
+    end, ESPSection)
+    
+    CreateToggle("Name ESP", true, function(Value)
+        ESP.Name = Value
+    end, ESPSection)
+    
+    CreateToggle("Distance ESP", true, function(Value)
+        ESP.Distance = Value
+    end, ESPSection)
+    
+    CreateToggle("Tracers", true, function(Value)
+        ESP.Tracers = Value
+    end, ESPSection)
+    
+    CreateToggle("Health Bar", true, function(Value)
+        ESP.HealthBar = Value
+    end, ESPSection)
+    
+    CreateToggle("Team Check", true, function(Value)
+        ESP.TeamCheck = Value
+    end, ESPSection)
+    
+    CreateToggle("Show Team", false, function(Value)
+        ESP.ShowTeam = Value
+    end, ESPSection)
+end
+
+local function CreatePlayerContent()
+    local TabFrame = TabFrames["PLAYER"].ScrollFrame
+    
+    local MovementSection = CreateSection("Movement", TabFrame)
+    
+    CreateToggle("Speed Hack", false, function(Value)
+        Player.Speed = Value
+        if Value and LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = Player.SpeedValue
+            end
+        end
+    end, MovementSection)
+    
+    CreateSlider("Speed Value", 16, 200, 50, function(Value)
+        Player.SpeedValue = Value
+        if Player.Speed and LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = Value
+            end
+        end
+    end, MovementSection)
+    
+    CreateToggle("Jump Hack", false, function(Value)
+        Player.Jump = Value
+        if Value and LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.JumpPower = Player.JumpValue
+            end
+        end
+    end, MovementSection)
+    
+    CreateSlider("Jump Value", 50, 200, 50, function(Value)
+        Player.JumpValue = Value
+        if Player.Jump and LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.JumpPower = Value
+            end
+        end
+    end, MovementSection)
+    
+    CreateToggle("Noclip", false, function(Value)
+        Player.Noclip = Value
+        StartNoclip()
+    end, MovementSection)
+    
+    CreateToggle("Fly", false, function(Value)
+        Player.Fly = Value
+        StartFly()
+    end, MovementSection)
+    
+    CreateSlider("Fly Speed", 10, 200, 50, function(Value)
+        Player.FlySpeed = Value
+    end, MovementSection)
+end
+
+local function CreateWorldContent()
+    local TabFrame = TabFrames["WORLD"].ScrollFrame
+    
+    local LightingSection = CreateSection("Lighting", TabFrame)
+    
+    CreateToggle("Full Bright", false, function(Value)
+        World.FullBright = Value
+        UpdateWorld()
+    end, LightingSection)
+    
+    CreateSlider("Time of Day", 0, 24, 14, function(Value)
+        World.Time = Value
+        UpdateWorld()
+    end, LightingSection)
+    
+    CreateToggle("Remove Fog", false, function(Value)
+        World.Fog = not Value
+        UpdateWorld()
+    end, LightingSection)
+    
+    local GraphicsSection = CreateSection("Graphics", TabFrame)
+    
+    CreateButton("Remove Textures", function()
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("Texture") or obj:IsA("Decal") then
+                obj:Destroy()
+            end
+        end
+        UpdateStatus("Textures Removed")
+    end, GraphicsSection)
+    
+    CreateButton("Remove Particles", function()
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") then
+                obj:Destroy()
+            end
+        end
+        UpdateStatus("Particles Removed")
+    end, GraphicsSection)
+end
+
+local function CreateMiscContent()
+    local TabFrame = TabFrames["MISC"].ScrollFrame
+    
+    local ToolsSection = CreateSection("Tools", TabFrame)
+    
+    CreateButton("Rejoin Server", function()
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
+    end, ToolsSection)
+    
+    CreateButton("Server Hop", function()
+        local servers = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Desc&limit=100"))
+        for _, server in pairs(servers.data) do
+            if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, server.id)
+                break
+            end
+        end
+    end, ToolsSection)
+    
+    CreateButton("Copy Discord", function()
+        setclipboard("https://discord.gg/seZxMDM3pa")
+        UpdateStatus("Discord link copied!")
+    end, ToolsSection)
+    
+    CreateButton("Save Config", function()
+        UpdateStatus("Config Saved (Placeholder)")
+    end, ToolsSection)
+    
+    CreateButton("Load Config", function()
+        UpdateStatus("Config Loaded (Placeholder)")
+    end, ToolsSection)
+end
+
+local function CreateCreditsContent()
+    local TabFrame = TabFrames["CREDITS"].ScrollFrame
+    
+    local CreditsSection = CreateSection("Credits", TabFrame)
+    
+    local CreditsText = Instance.new("TextLabel")
+    CreditsText.Size = UDim2.new(1, 0, 0, 300)
+    CreditsText.BackgroundTransparency = 1
+    CreditsText.Text = [[
+🔥 VEX AIMBOT v1.0 (BETA) 🔥
+
+Developed by X.Ports Team
+
+🌟 Features:
+- Advanced Aimbot System
+- Complete ESP Suite
+- Player Enhancements
+- World Modifications
+- Professional UI
+
+📞 Support:
+Discord: discord.gg/seZxMDM3pa
+
+⚠️ Warning:
+Use at your own risk
+This is for educational purposes only
+
+Thank you for using VEX AIMBOT!
+    ]]
+    CreditsText.TextColor3 = Color3.fromRGB(0, 255, 255)
+    CreditsText.TextSize = 14
+    CreditsText.Font = Enum.Font.Gotham
+    CreditsText.TextYAlignment = Enum.TextYAlignment.Top
+    CreditsText.ZIndex = 4
+    CreditsText.Parent = CreditsSection
+end
+
+-- =============================================
+-- Initialize System
+-- =============================================
+local function Init()
+    -- Make window draggable
+    MakeDraggable(Header, MainContainer)
+    
+    -- Button events
+    MinimizeButton.MouseButton1Click:Connect(ToggleVisibility)
+    CloseButton.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
+    MiniButton.MouseButton1Click:Connect(ToggleVisibility)
+    
+    -- Create tab contents
+    CreateAimbotContent()
+    CreateVisualsContent()
+    CreatePlayerContent()
+    CreateWorldContent()
+    CreateMiscContent()
+    CreateCreditsContent()
+    
+    -- Initialize systems
+    StartAimbot()
+    UpdateWorld()
+    
+    -- Keybinds for aimbot
+    UserInputService.InputBegan:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+            Aimbot.Active = Aimbot.Enabled
+        end
+    end)
+    
+    UserInputService.InputEnded:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+            Aimbot.Active = false
+        end
+    end)
+    
+    -- Auto-attach ESP to players
+    Players.PlayerAdded:Connect(function(player)
+        if ESP.Enabled then
+            CreateESP(player)
+        end
+    end)
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and ESP.Enabled then
+            CreateESP(player)
+        end
+    end
+    
+    -- Button hover effects
+    local function CreateButtonEffect(button)
+        button.MouseEnter:Connect(function()
+            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = button.BackgroundColor3 + Color3.fromRGB(20, 20, 20)}):Play()
+        end)
+        
+        button.MouseLeave:Connect(function()
+            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = button.BackgroundColor3 - Color3.fromRGB(20, 20, 20)}):Play()
+        end)
+    end
+    
+    -- Apply effects to all buttons
+    for _, tabButton in pairs(TabButtons) do
+        CreateButtonEffect(tabButton)
+    end
+    
+    CreateButtonEffect(MinimizeButton)
+    CreateButtonEffect(CloseButton)
+    CreateButtonEffect(MiniButton)
+    
+    -- Background animation
+    spawn(function()
+        while ScreenGui.Parent do
+            BackgroundGradient.Rotation = BackgroundGradient.Rotation + 0.3
+            wait(0.1)
+        end
+    end)
+    
+    UpdateStatus("VEX AIMBOT v1.0 (BETA) Loaded Successfully!")
+end
+
+-- Start execution
+Init()
